@@ -8,8 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from fast_zero.database import get_session
 from fast_zero.models import User
-from fast_zero.schemas import FilterPage, Message, UserList, UserPublic, UserSchema
-from fast_zero.security import get_current_user, get_password_hash
+from fast_zero.schemas import (
+    FilterPage,
+    Message,
+    UserList,
+    UserPublic,
+    UserSchema,
+)
+from fast_zero.security import (
+    get_current_user,
+    get_password_hash,
+)
 
 router = APIRouter(prefix='/users', tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -32,7 +41,13 @@ async def create_user(user: UserSchema, session: Session):
                 detail='Email already exists',
             )
 
-    db_user = User(username=user.username, password=get_password_hash(user.password), email=user.email)
+    hashed_password = get_password_hash(user.password)
+
+    db_user = User(
+        email=user.email,
+        username=user.username,
+        password=hashed_password,
+    )
 
     session.add(db_user)
     await session.commit()
@@ -44,6 +59,7 @@ async def create_user(user: UserSchema, session: Session):
 @router.get('/', response_model=UserList)
 async def read_users(session: Session, filter_users: Annotated[FilterPage, Query()]):
     query = await session.scalars(select(User).offset(filter_users.offset).limit(filter_users.limit))
+
     users = query.all()
 
     return {'users': users}

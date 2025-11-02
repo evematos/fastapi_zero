@@ -28,5 +28,5 @@ class Token(BaseModel):
 
 
 class FilterPage(BaseModel):
-    offset: int = Field(ge=0, default=0)
-    limit: int = Field(ge=0, default=10)
+    offset: int = Field(0, ge=0)
+    limit: int = Field(100, ge=1)
