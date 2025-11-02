@@ -26,6 +26,17 @@ def test_read_users(client, user, token):
     assert response.json() == {'users': [user_schema]}
 
 
+def test_read_user_id(client, user, token):
+    response = client.get(f'/users/{user.id}', headers={'Authorization': f'Bearer {token}'})
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'username': 'Teste',
+        'email': 'teste@test.com',
+        'id': user.id,
+    }
+
+
 def test_update_user(client, user, token):
     response = client.put(
         f'/users/{user.id}',
